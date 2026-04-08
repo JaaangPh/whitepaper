@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blocklana — Whitepaper</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --sidebar-bg: #090d13;
+      --sidebar-hover: #13191f;
+      --sidebar-active: #0f1e14;
+      --border: #21262d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #484f58;
+      --accent: #FFD700;
+      --accent-dim: rgba(255,215,0,0.1);
+      --accent-hover: rgba(255,215,0,0.06);
+      --secondary: #00D4FF;
+      --secondary-dim: rgba(0,212,255,0.1);
+      --success: #3fb950;
+      --warning: #d29922;
+      --warning-dim: rgba(210,153,34,0.1);
+      --content-bg: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #21262d;
+      --sidebar-width: 280px;
+      --header-height: 56px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.7;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .top-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-height);
+      background: var(--sidebar-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      z-index: 1000;
+      gap: 1rem;
+    }
+
+    .header-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #FFD700, #00D4FF);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      white-space: nowrap;
+      letter-spacing: 1px;
+    }
+
+    .header-divider { width: 1px; height: 24px; background: var(--border); }
+
+    .header-title { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
+
+    .header-search {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.375rem 0.75rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s;
+    }
+    .header-search:hover { border-color: var(--accent); color: var(--text-secondary); }
+    .header-search kbd { font-size: 0.65rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+    .mobile-menu-btn { display: none; background: none; border: none; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; padding: 0.25rem; }
+
+    .layout { display: flex; padding-top: var(--header-height); min-height: 100vh; }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: var(--header-height);
+      bottom: 0; left: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 1.5rem 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      z-index: 900;
+      transition: transform 0.3s ease;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .sidebar-section { margin-bottom: 1.5rem; }
+
+    .sidebar-section-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      padding: 0 1.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.45rem 1.25rem;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+      text-decoration: none;
+    }
+    .sidebar-item:hover { background: var(--sidebar-hover); color: var(--text-primary); }
+    .sidebar-item.active { background: var(--sidebar-active); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .sidebar-item .icon { font-size: 0.85rem; width: 16px; text-align: center; flex-shrink: 0; }
+
+    .main-content { margin-left: var(--sidebar-width); flex: 1; min-width: 0; display: flex; }
+
+    .content-area { flex: 1; max-width: 840px; padding: 3rem 3.5rem 6rem; min-width: 0; }
+
+    .toc-panel {
+      width: 220px;
+      flex-shrink: 0;
+      padding: 3rem 1.5rem;
+      position: sticky;
+      top: var(--header-height);
+      height: calc(100vh - var(--header-height));
+      overflow-y: auto;
+    }
+    .toc-panel-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .toc-link { display: block; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; padding: 0.3rem 0; border-left: 2px solid var(--border); padding-left: 0.75rem; transition: all 0.15s; margin-bottom: 0.1rem; }
+    .toc-link:hover { color: var(--accent); border-left-color: var(--accent); }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-breadcrumb { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem; }
+    .page-breadcrumb span { color: var(--text-secondary); }
+
+    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2; letter-spacing: -0.02em; }
+    .page-subtitle { font-size: 1rem; color: var(--text-secondary); margin-bottom: 2rem; }
+    .page-divider { border: none; border-top: 1px solid var(--border); margin-bottom: 2rem; }
+
+    h2 { font-size: 1.3rem; font-weight: 600; margin-top: 2.5rem; margin-bottom: 1rem; letter-spacing: -0.01em; }
+    h3 { font-size: 1rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.5rem; color: var(--accent); }
+    h4 { font-size: 0.875rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.4rem; color: var(--secondary); }
+
+    p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.75; }
+    strong { color: var(--text-primary); font-weight: 600; }
+
+    ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    li { font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.4rem; line-height: 1.6; }
+    li strong { color: var(--text-primary); }
+
+    .hint { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; display: flex; gap: 0.75rem; font-size: 0.85rem; align-items: flex-start; }
+    .hint.info { background: var(--secondary-dim); border-left: 3px solid var(--secondary); }
+    .hint.gold { background: var(--accent-dim); border-left: 3px solid var(--accent); }
+    .hint.warning { background: var(--warning-dim); border-left: 3px solid var(--warning); }
+    .hint p { margin: 0; color: var(--text-primary); font-size: 0.85rem; }
+    .hint ul { margin: 0.5rem 0 0 1rem; }
+    .hint ul li { font-size: 0.83rem; }
+    .hint ol { margin: 0.5rem 0 0 1rem; }
+    .hint ol li { font-size: 0.83rem; }
+    .hint-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+
+    .token-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.72rem; font-weight: 700; font-family: 'Orbitron', sans-serif; padding: 2px 8px; border-radius: 20px; border: 1px solid; vertical-align: middle; }
+    .token-badge.cashx { background: var(--accent-dim); color: var(--accent); border-color: rgba(255,215,0,0.25); }
+    .token-badge.cash { background: var(--secondary-dim); color: var(--secondary); border-color: rgba(0,212,255,0.25); }
+
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 1.25rem; transition: border-color 0.2s, transform 0.2s; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card-icon { font-size: 1.4rem; margin-bottom: 0.65rem; }
+    .card-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-primary); }
+    .card-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+
+    .table-wrap { overflow-x: auto; margin: 1.5rem 0; border-radius: 8px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    thead { background: var(--card-bg); }
+    th { padding: 0.75rem 1rem; text-align: left; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,215,0,0.03); }
+    .tag { display: inline-block; font-size: 0.7rem; font-weight: 600; border-radius: 4px; padding: 2px 7px; }
+    .tag.gold { background: var(--accent-dim); color: var(--accent); }
+    .tag.blue { background: var(--secondary-dim); color: var(--secondary); }
+    .tag.green { background: rgba(63,185,80,0.12); color: var(--success); }
+
+    .cmd-block { background: #0a0d12; border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+    .cmd-row { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+    .cmd-row:last-child { margin-bottom: 0; }
+    .cmd { font-family: 'Courier New', monospace; font-size: 0.8rem; color: var(--accent); background: rgba(255,215,0,0.07); border: 1px solid rgba(255,215,0,0.15); padding: 3px 10px; border-radius: 5px; white-space: nowrap; }
+    .cmd-desc { font-size: 0.78rem; color: var(--text-muted); }
+
+    .roadmap { position: relative; padding-left: 2rem; }
+    .roadmap::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+    .roadmap-item { position: relative; margin-bottom: 2.25rem; }
+    .roadmap-dot { position: absolute; left: -2rem; top: 5px; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 3px solid var(--sidebar-bg); box-shadow: 0 0 8px rgba(255,215,0,0.4); }
+    .roadmap-dot.upcoming { background: var(--card-bg); border-color: var(--border); box-shadow: none; }
+    .roadmap-phase-label { font-family: 'Orbitron', sans-serif; font-size: 0.52rem; font-weight: 700; color: var(--accent); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .roadmap-phase-label.upcoming { color: var(--text-muted); }
+    .roadmap-title { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; }
+    .roadmap-list { list-style: none; padding: 0; margin: 0; }
+    .roadmap-list li { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.25rem; padding-left: 1rem; position: relative; }
+    .roadmap-list li::before { content: '–'; position: absolute; left: 0; color: var(--text-muted); }
+
+    .dl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1rem 0; }
+    .dl-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem; transition: border-color 0.2s; }
+    .dl-card:hover { border-color: var(--accent); }
+    .dl-icon { font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--accent); }
+    .dl-name { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.2rem; }
+    .dl-desc { font-size: 0.76rem; color: var(--text-muted); margin-bottom: 0.6rem; line-height: 1.4; }
+    .dl-recommended { display: inline-block; background: rgba(63,185,80,0.12); color: var(--success); font-size: 0.65rem; font-weight: 600; border-radius: 4px; padding: 2px 7px; margin-bottom: 0.4rem; }
+    .dl-link { font-size: 0.78rem; color: var(--secondary); text-decoration: none; }
+    .dl-link:hover { text-decoration: underline; }
+
+    .server-ip-box { display: inline-block; background: var(--accent-dim); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; padding: 0.6rem 1.25rem; font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--accent); letter-spacing: 1px; margin: 0.5rem 0 1rem; }
+
+    .page-nav { display: flex; gap: 1rem; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+    .page-nav-btn { flex: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; cursor: pointer; text-decoration: none; transition: all 0.2s; display: flex; flex-direction: column; gap: 0.25rem; }
+    .page-nav-btn:hover { border-color: var(--accent); background: var(--accent-hover); }
+    .page-nav-btn.next { text-align: right; }
+    .page-nav-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .page-nav-title { font-size: 0.85rem; font-weight: 500; color: var(--text-primary); }
+
+    @media (max-width: 1100px) { .toc-panel { display: none; } .content-area { max-width: 100%; } }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; }
+      .content-area { padding: 2rem 1.5rem 5rem; }
+      .mobile-menu-btn { display: block; }
+      .header-search kbd { display: none; }
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .red-icon {
+  width: 20px;
+  height: 20px;
+  filter: invert(18%) sepia(96%) saturate(7493%) hue-rotate(357deg) brightness(97%) contrast(119%);
+}
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+  <div class="header-logo">Blocklana</div>
+  <div class="header-divider"></div>
+  <span class="header-title">Whitepaper</span>
+  <div class="header-search">
+    <span>🔍</span> Search...
+    <kbd>⌘K</kbd>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Introduction</div>
+      <a class="sidebar-item active" data-page="intro"><span class="icon">💎</span> About Blocklana</a>
+      <a class="sidebar-item" data-page="why-minecraft"><span class="icon">🌍</span> Why Minecraft?</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Game Overview</div>
+      <a class="sidebar-item" data-page="gameplay"><span class="icon">🎮</span> Gameplay Loop</a>
+      <a class="sidebar-item" data-page="ranks"><span class="icon">🏅</span> Rank System</a>
+      <a class="sidebar-item" data-page="ore-rewards"><span class="icon">⛏</span> Ore Rewards</a>
+      <a class="sidebar-item" data-page="leaderboards"><span class="icon">🏆</span> Leaderboards</a>
+      <a class="sidebar-item" data-page="staking">
+  <img src="https://img.icons8.com/?size=100&id=ntsraWy5BYxX&format=png" class="icon red-icon" alt="staking icon">
+  Liquid Staking
+</a>
+      <a class="sidebar-item" data-page="commands"><span class="icon">💻</span> Commands</a>
+      <a class="sidebar-item" data-page="shop"><span class="icon">🛒</span> Game Shop</a>
+      <a class="sidebar-item" data-page="downloads"><span class="icon">⬇️</span> Downloads</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Play-to-Earn</div>
+      <a class="sidebar-item" data-page="earning-sources"><span class="icon">💰</span> Earning Sources</a>
+      <a class="sidebar-item" data-page="tokens"><span class="icon">🪙</span> Token Types</a>
+      <a class="sidebar-item" data-page="nfts"><span class="icon">🔷</span> NFT Pickaxes</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Scholarship</div>
+      <a class="sidebar-item" data-page="scholarship"><span class="icon">🤝</span> Scholarship Program</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Economics</div>
+      <a class="sidebar-item" data-page="tokenomics"><span class="icon">📊</span> Tokenomics</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Project</div>
+      <a class="sidebar-item" data-page="roadmap"><span class="icon">🗺</span> Roadmap</a>
+    </div>
+
+    <div style="padding:1.5rem 1.25rem;border-top:1px solid var(--border);margin-top:0.5rem;">
+      <a href="https://Blocklana.xyz/dashboard" target="_blank" style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--accent);text-decoration:none;font-weight:500;">
+        🚀 Get Started <span style="font-size:0.65rem;color:var(--text-muted);">↗</span>
+      </a>
+    </div>
+  </nav>
+
+  <div id="overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:800;" onclick="closeSidebar()"></div>
+
+  <main class="main-content">
+    <div class="content-area">
+
+      <!-- INTRO -->
+      <div class="page active" id="page-intro">
+        <div class="page-breadcrumb">Introduction <span>›</span> About Blocklana</div>
+        <h1>About Blocklana</h1>
+        <p class="page-subtitle">A revolutionary Play-to-Earn Minecraft experience powered by the Solana blockchain.</p>
+        <hr class="page-divider">
+        <p>Blocklana is a revolutionary <strong>Play-to-Earn / Free-to-Play</strong> Solana memecoin blockchain game within Minecraft, where players mine ore blocks, compete on leaderboards, and earn cryptocurrency assets: <span class="token-badge cash">$CASH</span> and <span class="token-badge cashx">$CASHX</span>.</p>
+        <p>Built on the Solana blockchain, Blocklana transforms the classic Minecraft mining experience into a dynamic economic ecosystem where gameplay directly translates to real cryptocurrency earnings. Our platform democratizes access to blockchain gaming by eliminating traditional barriers to entry.</p>
+        <div class="hint gold">
+          <span class="hint-icon">💎</span>
+          <p><strong>Mine Ores · Compete · Earn <span class="token-badge cashx" style="font-size:0.65rem;">$CASHX</span> & <span class="token-badge cash" style="font-size:0.65rem;">$CASH</span></strong> — Revolutionizing Minecraft with Play-to-Earn on Solana Blockchain.</p>
+        </div>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">⛏️</div><div class="card-title">Mine to Earn</div><div class="card-desc">Every ore block mined yields $CASHX tokens directly to your wallet.</div></div>
+          <div class="card"><div class="card-icon">🏆</div><div class="card-title">Compete</div><div class="card-desc">Climb seasonal leaderboards for massive $CASH rewards every 60 days.</div></div>
+          <div class="card"><div class="card-icon">🔷</div><div class="card-title">Own NFTs</div><div class="card-desc">Diamond pickaxe NFTs on Solana — fully owned, tradeable, and upgradeable.</div></div>
+          <div class="card"><div class="card-icon">🌐</div><div class="card-title">Free to Play</div><div class="card-desc">No upfront investment required. Start earning through skill and dedication.</div></div>
+        </div>
+        <div class="page-nav">
+          <div></div>
+          <a class="page-nav-btn next" data-nav="why-minecraft"><span class="page-nav-label">Next →</span><span class="page-nav-title">Why Minecraft?</span></a>
+        </div>
+      </div>
+
+      <!-- WHY MINECRAFT -->
+      <div class="page" id="page-why-minecraft">
+        <div class="page-breadcrumb">Introduction <span>›</span> Why Minecraft?</div>
+        <h1>Why Minecraft?</h1>
+        <p class="page-subtitle">The perfect foundation for a sustainable blockchain gaming economy.</p>
+        <hr class="page-divider">
+        <p>The fusion of Play-to-Earn mechanics with Minecraft's sandbox universe represents a groundbreaking advancement in blockchain gaming. Minecraft's proven longevity, massive player base, and open-ended gameplay provide the perfect foundation for sustainable economic ecosystems.</p>
+        <div class="hint info">
+          <span class="hint-icon">🌍</span>
+          <div>
+            <p style="margin-bottom:0.5rem;"><strong>Why Minecraft is Revolutionary for Play-to-Earn:</strong></p>
+            <ul>
+              <li><strong>140+ Million Active Players</strong> — Immediate network effects and community</li>
+              <li><strong>Proven Longevity</strong> — Over a decade of sustained popularity</li>
+              <li><strong>Universal Appeal</strong> — Cross-generational and cross-cultural accessibility</li>
+              <li><strong>Low Learning Curve</strong> — Familiar mechanics lower entry barriers</li>
+              <li><strong>Infinite Scalability</strong> — Sandbox nature allows endless economic expansion</li>
+            </ul>
+          </div>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="intro"><span class="page-nav-label">← Previous</span><span class="page-nav-title">About Blocklana</span></a>
+          <a class="page-nav-btn next" data-nav="gameplay"><span class="page-nav-label">Next →</span><span class="page-nav-title">Gameplay Loop</span></a>
+        </div>
+      </div>
+
+      <!-- GAMEPLAY -->
+      <div class="page" id="page-gameplay">
+        <div class="page-breadcrumb">Game Overview <span>›</span> Gameplay Loop</div>
+        <h1>Gameplay Loop</h1>
+        <p class="page-subtitle">A Free-to-Play model with premium enhancements built inside Minecraft.</p>
+        <hr class="page-divider">
+        <p>Blocklana operates as a specialized Minecraft server with integrated blockchain economics, following a <strong>Free-to-Play with premium enhancements</strong> model. Players engage in resource mining, competition, and strategic asset management within a persistent Minecraft world.</p>
+        <h2>Core Gameplay Loop</h2>
+        <div class="hint info">
+          <span class="hint-icon">🔄</span>
+          <div>
+            <ol style="margin:0;padding-left:1.25rem;">
+              <li><strong>Join & Authenticate</strong> — Access server via <code style="background:var(--card-bg);padding:1px 6px;border-radius:4px;font-size:0.78rem;color:var(--accent);">/login</code></li>
+              <li><strong>Select Mining Zone</strong> — Teleport using <code style="background:var(--card-bg);padding:1px 6px;border-radius:4px;font-size:0.78rem;color:var(--accent);">/mine</code></li>
+              <li><strong>Mine & Accumulate</strong> — Earn <span class="token-badge cashx" style="font-size:0.65rem;">$CASHX</span> from every ore</li>
+              <li><strong>Compete</strong> — Climb seasonal leaderboards</li>
+              <li><strong>Upgrade</strong> — Purchase ranks and NFT tools</li>
+              <li><strong>Earn & Trade</strong> — Convert earnings and trade assets</li>
+            </ol>
+          </div>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="why-minecraft"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Why Minecraft?</span></a>
+          <a class="page-nav-btn next" data-nav="ranks"><span class="page-nav-label">Next →</span><span class="page-nav-title">Rank System</span></a>
+        </div>
+      </div>
+
+      <!-- RANKS -->
+      <div class="page" id="page-ranks">
+        <div class="page-breadcrumb">Game Overview <span>›</span> Rank System</div>
+        <h1>Rank System</h1>
+        <p class="page-subtitle">Premium ranks provide enhanced drop rates and rewards.</p>
+        <hr class="page-divider">
+        <p>Players mine various ore blocks to earn <span class="token-badge cashx">$CASHX</span> tokens. Premium ranks provide enhanced drop rates and rewards, creating a tiered earning system that rewards commitment while remaining accessible to all.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Rank</th><th>Drop Rate</th><th>Reward Multiplier</th><th>Mining Zone</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Miner</strong></td><td>7%</td><td>1.0x</td><td>Standard Area</td></tr>
+              <tr><td><strong>Miner+</strong></td><td>10%</td><td><span class="tag gold">1.4x</span></td><td>Enhanced Area</td></tr>
+              <tr><td><strong>Miner++</strong></td><td>14%</td><td><span class="tag gold">2.0x</span></td><td>Premium Area</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hint gold">
+          <span class="hint-icon">⚡</span>
+          <p>Higher ranks not only increase drop rates but also unlock access to exclusive premium mining zones with denser ore spawns.</p>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="gameplay"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Gameplay Loop</span></a>
+          <a class="page-nav-btn next" data-nav="ore-rewards"><span class="page-nav-label">Next →</span><span class="page-nav-title">Ore Rewards</span></a>
+        </div>
+      </div>
+
+      <!-- ORE REWARDS -->
+      <div class="page" id="page-ore-rewards">
+        <div class="page-breadcrumb">Game Overview <span>›</span> Ore Rewards</div>
+        <h1>Ore Rewards</h1>
+        <p class="page-subtitle">Every ore mined yields $CASHX — some with bonus gemstone drops.</p>
+        <hr class="page-divider">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Block Type</th><th>$CASHX Drop</th><th>Gemstone Drop</th><th>Rarity</th></tr></thead>
+            <tbody>
+              <tr><td>⬜ Iron Ore</td><td>1</td><td>—</td><td><span class="tag green">Common</span></td></tr>
+              <tr><td>⬛ Coal Ore</td><td>1</td><td>—</td><td><span class="tag green">Common</span></td></tr>
+              <tr><td>🟥 Redstone Ore</td><td>1</td><td>—</td><td><span class="tag blue">Uncommon</span></td></tr>
+              <tr><td>💚 Emerald Ore</td><td>1</td><td>—</td><td><span class="tag gold">Rare</span></td></tr>
+              <tr><td>🟡 Gold Ore</td><td>1</td><td>—</td><td><span class="tag blue">Uncommon</span></td></tr>
+              <tr><td>💎 Diamond Ore</td><td>1</td><td>1 Gemstone (worth 3 $CASHX)</td><td><span class="tag gold">Rare</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hint info">
+          <span class="hint-icon">💎</span>
+          <p>Diamond Ore is the most valuable block — it drops a <strong>Gemstone worth 3 $CASHX</strong> in addition to the base token drop, making it the primary target for competitive miners.</p>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="ranks"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Rank System</span></a>
+          <a class="page-nav-btn next" data-nav="leaderboards"><span class="page-nav-label">Next →</span><span class="page-nav-title">Leaderboards</span></a>
+        </div>
+      </div>
+
+      <!-- LEADERBOARDS -->
+      <div class="page" id="page-leaderboards">
+        <div class="page-breadcrumb">Game Overview <span>›</span> Leaderboards</div>
+        <h1>Leaderboards</h1>
+        <p class="page-subtitle">Compete in 60-day seasons for substantial $CASH rewards.</p>
+        <hr class="page-divider">
+        <p>Compete in <strong>60-day seasons</strong> to earn substantial <span class="token-badge cash">$CASH</span> rewards. Rankings are determined by total <span class="token-badge cashx">$CASHX</span> earned through mining.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Position</th><th>$CASH Reward</th><th>Additional Perks</th></tr></thead>
+            <tbody>
+              <tr><td><strong>🥇 #1</strong></td><td><span class="tag gold">100,000 $CASH</span></td><td>Exclusive NFT + Miner++ Rank</td></tr>
+              <tr><td><strong>🥈 #2</strong></td><td><span class="tag gold">50,000 $CASH</span></td><td>Miner++ Rank</td></tr>
+              <tr><td><strong>🥉 #3</strong></td><td><span class="tag gold">10,000 $CASH</span></td><td>Miner+ Rank</td></tr>
+              <tr><td><strong>#4 – #10</strong></td><td>3,000 $CASH each</td><td>Rank Upgrade Coupon</td></tr>
+              <tr><td><strong>#11 – #15</strong></td><td>500 $CASH each</td><td>Special Title</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="ore-rewards"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Ore Rewards</span></a>
+          <a class="page-nav-btn next" data-nav="staking"><span class="page-nav-label">Next →</span><span class="page-nav-title">Staking</span></a>
+        </div>
+      </div>
+
+      <!-- COMMANDS -->
+      <div class="page" id="page-commands">
+        <div class="page-breadcrumb">Game Overview <span>›</span> Commands</div>
+        <h1>Commands</h1>
+        <p class="page-subtitle">All in-game slash commands for navigating and earning on Blocklana.</p>
+        <hr class="page-divider">
+        <div class="cmd-block">
+          <div class="cmd-row"><span class="cmd">/login</span><span class="cmd-desc">Authenticate with password / 6-digit scholar code</span></div>
+          <div class="cmd-row"><span class="cmd">/help</span><span class="cmd-desc">List all in-game commands</span></div>
+          <div class="cmd-row"><span class="cmd">/mine</span><span class="cmd-desc">Teleport to your mining area</span></div>
+          <div class="cmd-row"><span class="cmd">/p help</span><span class="cmd-desc">Plot commands (paid ranks only)</span></div>
+          <div class="cmd-row"><span class="cmd">/kit</span><span class="cmd-desc">View / purchase NFT pickaxes</span></div>
+          <div class="cmd-row"><span class="cmd">/redeem</span><span class="cmd-desc">Activate purchased ranks</span></div>
+          <div class="cmd-row"><span class="cmd">/store</span><span class="cmd-desc">Open store website</span></div>
+          <div class="cmd-row"><span class="cmd">/sell</span><span class="cmd-desc">List items in marketplace</span></div>
+          <div class="cmd-row"><span class="cmd">/shop</span><span class="cmd-desc">Browse player marketplace</span></div>
+          <div class="cmd-row"><span class="cmd">/leaderboard</span><span class="cmd-desc">View current rankings</span></div>
+          <div class="cmd-row"><span class="cmd">/staff</span><span class="cmd-desc">Show online operators</span></div>
+          <div class="cmd-row"><span class="cmd">/rules</span><span class="cmd-desc">Display server rules</span></div>
+          <div class="cmd-row"><span class="cmd">/afk</span><span class="cmd-desc">AFK Area <span style="color:var(--warning);font-size:0.72rem;">(Coming Soon)</span></span></div>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="staking"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Staking</span></a>
+          <a class="page-nav-btn next" data-nav="shop"><span class="page-nav-label">Next →</span><span class="page-nav-title">Game Shop</span></a>
+        </div>
+      </div>
+
+      <!-- SHOP -->
+      <div class="page" id="page-shop">
+        <div class="page-breadcrumb">Game Overview <span>›</span> Game Shop</div>
+        <h1>Game Shop</h1>
+        <p class="page-subtitle">A player-driven marketplace for NFT pickaxes and tools.</p>
+        <hr class="page-divider">
+        <p>Blocklana features a player-driven marketplace where miners can trade NFT pickaxes and tools using <span class="token-badge cashx">$CASHX</span>. The <code style="background:var(--card-bg);padding:2px 8px;border-radius:4px;font-size:0.8rem;color:var(--accent);">/sell</code> command allows players to list items at custom prices, creating organic market dynamics based on supply, demand, and utility.</p>
+        <h2>Accessibility</h2>
+        <p>To ensure maximum accessibility, Blocklana supports connections from various Minecraft clients. This inclusive approach:</p>
+        <ul>
+          <li>Removes financial barriers for players in emerging markets</li>
+          <li>Ensures equal participation regardless of economic background</li>
+          <li>Accelerates community growth and ecosystem development</li>
+          <li>Prioritizes skill and dedication over purchasing power</li>
+        </ul>
+        <h3>Security Measures</h3>
+        <ul>
+          <li>Advanced server-side verification systems</li>
+          <li>Anti-abuse and anti-multi-account mechanisms</li>
+          <li>Balanced reward economics to prevent exploitation</li>
+          <li>Regular security audits and monitoring</li>
+        </ul>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="commands"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Commands</span></a>
+          <a class="page-nav-btn next" data-nav="downloads"><span class="page-nav-label">Next →</span><span class="page-nav-title">Downloads</span></a>
+        </div>
+      </div>
+
+      <!-- Staking -->
+      <div class="page" id="page-staking">
+        <div class="page-breadcrumb">Staking <span>›</span> Staking</div>
+        <h1>Staking</h1>
+        <p class="page-subtitle">A player-driven marketplace for NFT pickaxes and tools.</p>
+        <hr class="page-divider">
+        <p>Blocklana features a player-driven marketplace where miners can trade NFT pickaxes and tools using <span class="token-badge cashx">$CASHX</span>. The <code style="background:var(--card-bg);padding:2px 8px;border-radius:4px;font-size:0.8rem;color:var(--accent);">/sell</code> command allows players to list items at custom prices, creating organic market dynamics based on supply, demand, and utility.</p>
+        <h2>Accessibility</h2>
+        <p>To ensure maximum accessibility, Blocklana supports connections from various Minecraft clients. This inclusive approach:</p>
+        <ul>
+          <li>Removes financial barriers for players in emerging markets</li>
+          <li>Ensures equal participation regardless of economic background</li>
+          <li>Accelerates community growth and ecosystem development</li>
+          <li>Prioritizes skill and dedication over purchasing power</li>
+        </ul>
+        <h3>Security Measures</h3>
+        <ul>
+          <li>Advanced server-side verification systems</li>
+          <li>Anti-abuse and anti-multi-account mechanisms</li>
+          <li>Balanced reward economics to prevent exploitation</li>
+          <li>Regular security audits and monitoring</li>
+        </ul>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="leaderboards"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Leaderboards</span></a>
+          <a class="page-nav-btn next" data-nav="commands"><span class="page-nav-label">Next →</span><span class="page-nav-title">Commands</span></a>
+        </div>
+      </div>
+
+      <!-- DOWNLOADS -->
+      <div class="page" id="page-downloads">
+        <div class="page-breadcrumb">Game Overview <span>›</span> Downloads</div>
+        <h1>Downloads</h1>
+        <p class="page-subtitle">Get the right Minecraft launcher to start playing Blocklana.</p>
+        <hr class="page-divider">
+        <div class="hint warning">
+          <span class="hint-icon">⚠️</span>
+          <p><strong>Important Notice:</strong> Blocklana does not provide, distribute, or promote any specific Minecraft launcher. Players must obtain Minecraft client software through legitimate channels according to regional laws and Mojang/Microsoft terms of service.</p>
+        </div>
+        <h2>Desktop Launchers</h2>
+        <div class="dl-grid">
+          <div class="dl-card">
+            <div class="dl-icon"><i class="fas fa-desktop"></i></div>
+            <div class="dl-recommended">Recommended</div>
+            <div class="dl-name">TLauncher</div>
+            <div class="dl-desc">Popular desktop launcher with extensive community support.</div>
+            <a class="dl-link" href="https://tlauncher.org" target="_blank" rel="noopener">Download ↗</a>
+          </div>
+          <div class="dl-card">
+            <div class="dl-icon"><i class="fas fa-laptop"></i></div>
+            <div class="dl-name">SKLauncher</div>
+            <div class="dl-desc">Lightweight alternative with good performance.</div>
+            <a class="dl-link" href="https://skmedix.pl/downloads" target="_blank" rel="noopener">Download ↗</a>
+          </div>
+          <div class="dl-card">
+            <div class="dl-icon"><i class="fas fa-desktop"></i></div>
+            <div class="dl-name">TL Legacy</div>
+            <div class="dl-desc">Legacy version for older systems.</div>
+            <a class="dl-link" href="https://llaun.ch/en" target="_blank" rel="noopener">Download ↗</a>
+          </div>
+        </div>
+        <h2>Mobile (Android)</h2>
+        <div class="dl-grid">
+          <div class="dl-card">
+            <div class="dl-icon"><i class="fas fa-mobile-alt"></i></div>
+            <div class="dl-recommended">Recommended</div>
+            <div class="dl-name">MojoLauncher</div>
+            <div class="dl-desc">Optimized for mobile gameplay from Play Store.</div>
+            <a class="dl-link" href="https://play.google.com/store/apps/details?id=git.artdeell.mojo&hl=en" target="_blank" rel="noopener">Download ↗</a>
+          </div>
+          <div class="dl-card">
+            <div class="dl-icon"><i class="fas fa-tablet-alt"></i></div>
+            <div class="dl-name">PojavLauncher</div>
+            <div class="dl-desc">Advanced launcher for Android devices.</div>
+            <a class="dl-link" href="https://pojavlauncher.app" target="_blank" rel="noopener">Download ↗</a>
+          </div>
+        </div>
+        <h2>Connect to Server</h2>
+        <div class="hint gold">
+          <span class="hint-icon">🖥️</span>
+          <div>
+            <p style="margin-bottom:0.4rem;"><strong>Server IP Address:</strong></p>
+            <div class="server-ip-box">Blocklana.xyz</div>
+            <p style="margin:0;">Copy this address to your Minecraft client to start playing. All players connect to this address regardless of launcher choice.</p>
+          </div>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="shop"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Game Shop</span></a>
+          <a class="page-nav-btn next" data-nav="earning-sources"><span class="page-nav-label">Next →</span><span class="page-nav-title">Earning Sources</span></a>
+        </div>
+      </div>
+
+      <!-- EARNING SOURCES -->
+      <div class="page" id="page-earning-sources">
+        <div class="page-breadcrumb">Play-to-Earn <span>›</span> Earning Sources</div>
+        <h1>Earning Sources</h1>
+        <p class="page-subtitle">Multiple ways to earn cryptocurrency through gameplay.</p>
+        <hr class="page-divider">
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">⛏️</div><div class="card-title">Mining Ores</div><div class="card-desc">Every mined block yields $CASHX directly to your in-game balance.</div></div>
+          <div class="card"><div class="card-icon">🏆</div><div class="card-title">Leaderboards</div><div class="card-desc">Seasonal competition rewards top miners with substantial $CASH payouts.</div></div>
+          <div class="card"><div class="card-icon">💎</div><div class="card-title">Gemstone Drops</div><div class="card-desc">Additional $CASHX from rare diamond ore gemstone drops.</div></div>
+          <div class="card"><div class="card-icon">📈</div><div class="card-title">NFT Trading</div><div class="card-desc">Profit from NFT pickaxe appreciation and speculation in the player marketplace.</div></div>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="downloads"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Downloads</span></a>
+          <a class="page-nav-btn next" data-nav="tokens"><span class="page-nav-label">Next →</span><span class="page-nav-title">Token Types</span></a>
+        </div>
+      </div>
+
+      <!-- TOKENS -->
+      <div class="page" id="page-tokens">
+        <div class="page-breadcrumb">Play-to-Earn <span>›</span> Token Types</div>
+        <h1>Token Types</h1>
+        <p class="page-subtitle">A dual-token model separating speculative value from utility.</p>
+        <hr class="page-divider">
+        <h2><span class="token-badge cash">$CASH</span> — Solana Memecoin & Governance</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Property</th><th>Detail</th></tr></thead>
+            <tbody>
+              <tr><td>Total Supply</td><td><strong>1,000,000,000</strong> (1 Billion tokens)</td></tr>
+              <tr><td>Function</td><td>Leaderboard rewards, governance, external trading</td></tr>
+              <tr><td>Created On</td><td>pump.fun (Solana blockchain)</td></tr>
+              <tr><td>Uses</td><td>Voting, staking, DEX trading</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h2><span class="token-badge cashx">$CASHX</span> — In-Game Utility Token</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Property</th><th>Detail</th></tr></thead>
+            <tbody>
+              <tr><td>Fixed Value</td><td><strong>1 $CASHX = 0.00013 SOL</strong></td></tr>
+              <tr><td>Supply</td><td>Infinite (mined through gameplay)</td></tr>
+              <tr><td>Uses</td><td>NFT purchases, tool repairs, marketplace trading</td></tr>
+              <tr><td>Withdrawal</td><td>Convertible to SOL at fixed rate</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h2><span class="token-badge cashx">$SOLX</span> — Store Utility Token</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Property</th><th>Detail</th></tr></thead>
+            <tbody>
+              <tr><td>Fixed Value</td><td><strong>1 $SOLX = 0.018 USD</strong></td></tr>
+              <tr><td>Supply</td><td>Infinite (Purchase thru E-wallet payment method)</td></tr>
+              <tr><td>Uses</td><td>Purchase premium ranks, Liquid Staking, Blocklana Points (Airdrop)</td></tr>
+              <tr><td>Withdrawal</td><td>Can't be withdraw.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h2>Balance (In-Game Wallet)</h2>
+        <ul>
+          <li><strong>Function:</strong> Player's Minecraft-specific balance</li>
+          <li><strong>Uses:</strong> Purchasing diamond pickaxe NFTs and building blocks</li>
+          <li><strong>Note:</strong> Non-transferable outside the game</li>
+        </ul>
+        <div class="hint info">
+          <span class="hint-icon">💡</span>
+          <p><strong>Economic Stability Design:</strong> The dual-token model separates speculative value (<span class="token-badge cash" style="font-size:0.65rem;">$CASH</span>) from utility value (<span class="token-badge cashx" style="font-size:0.65rem;">$CASHX</span>), ensuring gameplay economics remain stable regardless of market fluctuations.</p>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="earning-sources"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Earning Sources</span></a>
+          <a class="page-nav-btn next" data-nav="nfts"><span class="page-nav-label">Next →</span><span class="page-nav-title">NFT Pickaxes</span></a>
+        </div>
+      </div>
+
+      <!-- NFTS -->
+      <div class="page" id="page-nfts">
+        <div class="page-breadcrumb">Play-to-Earn <span>›</span> NFT Pickaxes</div>
+        <h1>NFT Pickaxes</h1>
+        <p class="page-subtitle">Diamond Pickaxe NFTs — blockchain-based tools with significant mining advantages.</p>
+        <hr class="page-divider">
+        <p>NFT Diamond Pickaxes are Solana SPL tokens that are <strong>fully owned by players</strong> and freely tradable. They provide significant mining speed advantages that directly translate to higher earnings and better leaderboard positioning.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Level</th><th>Repair Cost ($CASHX)</th><th>Enchantment</th><th>Progress Required</th><th>Mining Speed</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Level 1</strong></td><td>10</td><td>Efficiency VII</td><td>10,000 blocks</td><td><span class="tag blue">2.5x</span></td></tr>
+              <tr><td><strong>Level 2</strong></td><td>10</td><td>Efficiency IX</td><td>10,000 blocks</td><td><span class="tag blue">3.5x</span></td></tr>
+              <tr><td><strong>Level 3</strong></td><td>7</td><td>Efficiency XI</td><td>10,000 blocks</td><td><span class="tag gold">5x</span></td></tr>
+              <tr><td><strong>Level 4</strong></td><td>5</td><td>Efficiency XIII</td><td>10,000 blocks</td><td><span class="tag gold">7x</span></td></tr>
+              <tr><td><strong>Level 5</strong></td><td>2</td><td>Efficiency XV</td><td>10,000 blocks</td><td><span class="tag gold">10x</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">⚡</div><div class="card-title">Speed Advantage</div><div class="card-desc">Faster mining = More blocks per hour = Higher leaderboard positioning and more earnings.</div></div>
+          <div class="card"><div class="card-icon">🔑</div><div class="card-title">Exclusive Zones</div><div class="card-desc">Access exclusive mining zones reserved for high-level NFT tool holders.</div></div>
+          <div class="card"><div class="card-icon">💰</div><div class="card-title">Profit Margins</div><div class="card-desc">Lower repair costs at higher levels improve long-term profit margins significantly.</div></div>
+          <div class="card"><div class="card-icon">📈</div><div class="card-title">Market Value</div><div class="card-desc">Premium NFTs retain and appreciate in marketplace value as demand grows.</div></div>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="tokens"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Token Types</span></a>
+          <a class="page-nav-btn next" data-nav="scholarship"><span class="page-nav-label">Next →</span><span class="page-nav-title">Scholarship Program</span></a>
+        </div>
+      </div>
+
+      <!-- SCHOLARSHIP -->
+      <div class="page" id="page-scholarship">
+        <div class="page-breadcrumb">Scholarship <span>›</span> Scholarship Program</div>
+        <h1>Scholarship Program</h1>
+        <p class="page-subtitle">Democratizing access to Play-to-Earn for players of all backgrounds.</p>
+        <hr class="page-divider">
+        <div class="hint info">
+          <span class="hint-icon">🤝</span>
+          <p>Blocklana's Scholarship Program ensures that players who cannot afford premium ranks can still participate meaningfully in the ecosystem. Through manager partnerships, players can borrow accounts to start earning immediately.</p>
+        </div>
+        <h2>How Scholarship Works</h2>
+        <ol>
+          <li><strong>Account Borrowing:</strong> Managers provide players with account credentials (username + 6-digit password)</li>
+          <li><strong>Immediate Access:</strong> Scholars can join the server and start mining immediately</li>
+          <li><strong>Automated Distribution:</strong> Earnings are automatically split based on pre-agreed percentages</li>
+          <li><strong>Secure Management:</strong> All agreements are transparent and viewable at Blocklana.xyz/scholar</li>
+        </ol>
+        <div class="hint warning">
+          <span class="hint-icon">⚠️</span>
+          <div>
+            <p style="margin-bottom:0.4rem;"><strong>Important Notes:</strong></p>
+            <ul>
+              <li>The 6-digit password is <strong>only for Minecraft server access</strong> and cannot be used on the main website</li>
+              <li>When the borrowing period expires, passwords automatically reset for security</li>
+              <li>Earnings distribution occurs automatically — no manual intervention required</li>
+              <li>All scholar agreements are transparent and verifiable on-chain</li>
+            </ul>
+          </div>
+        </div>
+        <h2>Benefits</h2>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🎓</div><div class="card-title">For Scholars</div><div class="card-desc">Zero initial investment. Start earning without purchasing ranks. Learn mechanics before committing capital.</div></div>
+          <div class="card"><div class="card-icon">📋</div><div class="card-title">For Managers</div><div class="card-desc">Revenue sharing from scholar mining proceeds. Manage multiple accounts and build loyal mining teams.</div></div>
+        </div>
+        <div class="hint gold">
+          <span class="hint-icon">🔒</span>
+          <p><strong>Transparency & Security:</strong> All scholarship agreements are recorded on the Solana blockchain, ensuring immutable records of terms, percentages, and distributions.</p>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="nfts"><span class="page-nav-label">← Previous</span><span class="page-nav-title">NFT Pickaxes</span></a>
+          <a class="page-nav-btn next" data-nav="tokenomics"><span class="page-nav-label">Next →</span><span class="page-nav-title">Tokenomics</span></a>
+        </div>
+      </div>
+
+      <!-- TOKENOMICS -->
+      <div class="page" id="page-tokenomics">
+        <div class="page-breadcrumb">Economics <span>›</span> Tokenomics</div>
+        <h1>Tokenomics</h1>
+        <p class="page-subtitle">A sustainable dual-token economic engine built on Solana.</p>
+        <hr class="page-divider">
+        <h2>Total Supply</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Token</th><th>Supply</th><th>Rate</th></tr></thead>
+            <tbody>
+              <tr><td><span class="token-badge cash">$CASH</span></td><td><strong>1,000,000,000</strong> (1 Billion)</td><td>Fixed supply</td></tr>
+              <tr><td><span class="token-badge cashx">$CASHX</span></td><td>Infinite (earned via gameplay)</td><td>1 $CASHX = 0.00013 SOL</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h2>Economic Flow</h2>
+        <div class="hint gold">
+          <span class="hint-icon">⚙️</span>
+          <div>
+            <p style="margin-bottom:0.5rem;"><strong>The Blocklana Economic Engine:</strong></p>
+            <ol style="margin:0;padding-left:1.25rem;">
+              <li><strong>Rank Purchase</strong> → Players buy ranks using SOL</li>
+              <li><strong>Store Wallet</strong> → SOL flows into ecosystem treasury</li>
+              <li><strong>Market Pressure</strong> → 50% SOL buys $CASH on pump.fun</li>
+              <li><strong>Community Rewards</strong> → 15% $CASH funds leaderboards</li>
+              <li><strong>Reserve Fund</strong> → 15% $CASH for future utility</li>
+              <li><strong>Token Burn</strong> → 20% $CASH permanently removed</li>
+              <li><strong>Liquidity Pool</strong> → 50% SOL funds $CASHX withdrawals</li>
+            </ol>
+          </div>
+        </div>
+        <h2>Inflation / Deflation Mechanics</h2>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🔥</div><div class="card-title">$CASH Deflation</div><div class="card-desc">20% burn rate creates continuous scarcity and long-term value appreciation.</div></div>
+          <div class="card"><div class="card-icon">⚓</div><div class="card-title">$CASHX Stability</div><div class="card-desc">Fixed SOL peg prevents inflation and guarantees predictable earning potential.</div></div>
+          <div class="card"><div class="card-icon">📈</div><div class="card-title">Buy Pressure</div><div class="card-desc">Automatic $CASH purchases from rank sales create consistent market demand.</div></div>
+          <div class="card"><div class="card-icon">💎</div><div class="card-title">Value Accrual</div><div class="card-desc">Multiple mechanisms support token appreciation for long-term holders.</div></div>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="scholarship"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Scholarship Program</span></a>
+          <a class="page-nav-btn next" data-nav="roadmap"><span class="page-nav-label">Next →</span><span class="page-nav-title">Roadmap</span></a>
+        </div>
+      </div>
+
+      <!-- ROADMAP -->
+      <div class="page" id="page-roadmap">
+        <div class="page-breadcrumb">Project <span>›</span> Roadmap</div>
+        <h1>Roadmap</h1>
+        <p class="page-subtitle">Our journey from foundation to a fully featured Web3 Minecraft ecosystem.</p>
+        <hr class="page-divider">
+        <div class="roadmap">
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <div class="roadmap-phase-label">Phase 1 — Foundation & Launch</div>
+            <div class="roadmap-title">Foundation & Launch</div>
+            <ul class="roadmap-list">
+              <li>Minecraft Server Launch</li>
+              <li>$CASH Token Creation</li>
+              <li>Basic Mining Mechanics</li>
+              <li>Initial Leaderboard System</li>
+              <li>Website & Store Launch</li>
+            </ul>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <div class="roadmap-phase-label">Phase 2 — Ecosystem Expansion</div>
+            <div class="roadmap-title">Ecosystem Expansion</div>
+            <ul class="roadmap-list">
+              <li>NFT Pickaxe System</li>
+              <li>Player Marketplace</li>
+              <li>Enhanced Mining Zones</li>
+              <li>Mobile Optimization</li>
+              <li>Community Events</li>
+            </ul>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot upcoming"></div>
+            <div class="roadmap-phase-label upcoming">Phase 3 — Advanced Features</div>
+            <div class="roadmap-title">Advanced Features</div>
+            <ul class="roadmap-list">
+              <li>AFK Earning System</li>
+              <li>Additional NFT Types</li>
+              <li>Advanced Security Systems</li>
+              <li>Cross-Platform Integration</li>
+              <li>Tournament System</li>
+            </ul>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot upcoming"></div>
+            <div class="roadmap-phase-label upcoming">Phase 4 — Maturity & Scaling</div>
+            <div class="roadmap-title">Maturity & Scaling</div>
+            <ul class="roadmap-list">
+              <li>$CASH Governance</li>
+              <li>Staking Mechanisms</li>
+              <li>Multi-Server Architecture</li>
+              <li>Analytics Dashboard</li>
+              <li>Cross-Game Integration</li>
+            </ul>
+          </div>
+        </div>
+        <div class="hint gold">
+          <span class="hint-icon">🎯</span>
+          <p><strong>Vision Statement:</strong> Blocklana aims to establish itself as the premier Play-to-Earn Minecraft experience, seamlessly blending traditional gaming enjoyment with meaningful economic opportunity. By prioritizing accessibility, fairness, and sustainable economics, we're building an ecosystem that rewards skill, dedication, and community participation for players worldwide.</p>
+        </div>
+        <div class="page-nav">
+          <a class="page-nav-btn" data-nav="tokenomics"><span class="page-nav-label">← Previous</span><span class="page-nav-title">Tokenomics</span></a>
+          <div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT TOC -->
+    <aside class="toc-panel">
+      <div class="toc-panel-title">On this page</div>
+      <div id="tocLinks"></div>
+    </aside>
+  </main>
+</div>
+
+<script>
+  const tocMap = {
+    intro: ['About Blocklana', 'Key Features'],
+    'why-minecraft': ['Why Minecraft?', 'Key Advantages'],
+    gameplay: ['Overview', 'Core Gameplay Loop'],
+    ranks: ['Rank Table', 'Rank Benefits'],
+    'ore-rewards': ['Ore Reward Table'],
+    leaderboards: ['Season Rewards', 'Prize Table'],
+    commands: ['All Commands'],
+    shop: ['Marketplace', 'Accessibility', 'Security'],
+    downloads: ['Desktop Launchers', 'Mobile', 'Connect to Server'],
+    'earning-sources': ['Earning Methods'],
+    tokens: ['$CASH Token', '$CASHX Token', 'Balance Wallet'],
+    nfts: ['NFT Levels', 'NFT Utilities'],
+    scholarship: ['How It Works', 'Benefits'],
+    tokenomics: ['Total Supply', 'Economic Flow', 'Mechanics'],
+    roadmap: ['Phase 1', 'Phase 2', 'Phase 3', 'Phase 4'],
+  };
+
+  function navigate(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+    const page = document.getElementById('page-' + pageId);
+    if (page) page.classList.add('active');
+    const sideItem = document.querySelector('.sidebar-item[data-page="' + pageId + '"]');
+    if (sideItem) sideItem.classList.add('active');
+    const tocLinks = document.getElementById('tocLinks');
+    tocLinks.innerHTML = '';
+    (tocMap[pageId] || []).forEach(label => {
+      const a = document.createElement('a');
+      a.className = 'toc-link';
+      a.textContent = label;
+      tocLinks.appendChild(a);
+    });
+    window.scrollTo(0, 0);
+    closeSidebar();
+  }
+
+  document.querySelectorAll('.sidebar-item[data-page]').forEach(item => {
+    item.addEventListener('click', () => navigate(item.dataset.page));
+  });
+
+  document.querySelectorAll('[data-nav]').forEach(btn => {
+    btn.addEventListener('click', () => navigate(btn.dataset.nav));
+  });
+
+  document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').style.display = 'block';
+  });
+
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').style.display = 'none';
+  }
+
+  navigate('intro');
+</script>
+</body>
+</html>
